@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#4f8ef7">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="englishku">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>englishku</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,sans-serif;background:#f0f7ff;color:#1a2b4a;max-width:640px;margin:0 auto;padding:12px 12px 40px}
+  header{background:linear-gradient(135deg,#4f8ef7,#7b5ff0);color:#fff;border-radius:16px;padding:18px;text-align:center;margin-bottom:12px}
+  header h1{font-size:22px;margin-bottom:4px}
+  header p{font-size:13px;opacity:.92}
+  #streak{font-size:15px;font-weight:700;margin-top:8px}
+  .modes{display:flex;gap:8px;justify-content:center;margin-bottom:14px}
+  .modes button{flex:1;max-width:200px;padding:10px;border:2px solid #4f8ef7;background:#fff;color:#4f8ef7;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer}
+  .modes button.on{background:#4f8ef7;color:#fff}
+  section{background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 2px 8px rgba(79,142,247,.12)}
+  section h2{font-size:17px;margin-bottom:6px}
+  section .hint{font-size:13px;color:#5a6b8c;margin-bottom:12px}
+  .stageHead{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+  .cefr{background:#7b5ff0;color:#fff;font-weight:800;font-size:13px;padding:4px 10px;border-radius:20px}
+  .stageDesc{font-size:13px;color:#5a6b8c;margin-bottom:10px}
+  .pbar{height:8px;background:#e3ecff;border-radius:6px;margin-bottom:10px;overflow:hidden}
+  .pbar>div{height:100%;background:linear-gradient(90deg,#34c77b,#4f8ef7);border-radius:6px}
+  .pkggrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .pkg{border:2px solid #dbe7ff;border-radius:14px;padding:12px 6px;background:#f8fbff;cursor:pointer}
+  .pkg:active{transform:scale(.95)}
+  .pkg .pkname{font-size:12px;font-weight:700}
+  .pkg .pkstar{font-size:12px;color:#8a6d1a;margin-top:6px}
+  .pkg.lock{opacity:.5;cursor:not-allowed}
+  .reviewBtn{width:100%;margin-top:10px;padding:11px;border:2px dashed #b78cff;background:#f6f0ff;color:#7b5ff0;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer}
+  .reviewBtn:disabled{opacity:.45;cursor:not-allowed}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .card{border:2px solid #dbe7ff;border-radius:14px;padding:12px 6px;text-align:center;cursor:pointer;transition:.15s;background:#f8fbff}
+  .card:active{transform:scale(.95)}
+  .card .emoji{font-size:44px;line-height:1.2}
+  .card .word{font-size:15px;font-weight:700;margin-top:6px;color:#1a2b4a}
+  .card .sent{font-size:11px;color:#5a6b8c;margin-top:4px;font-weight:400}
+  .card.done{border-color:#34c77b;background:#eefbf3}
+  .counter{font-size:13px;color:#5a6b8c;margin-bottom:10px;font-weight:600}
+  #quizBox{text-align:center}
+  #btnListen{font-size:17px;font-weight:700;background:#ffb020;border:none;color:#fff;padding:14px 26px;border-radius:14px;cursor:pointer;margin-bottom:14px}
+  #btnListen:active{transform:scale(.96)}
+  .opts{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  .opt{font-size:52px;padding:18px 6px;border:2px solid #dbe7ff;border-radius:14px;background:#f8fbff;cursor:pointer}
+  .opt.right{border-color:#34c77b;background:#d8f7e6}
+  .opt.wrong{border-color:#f0564f;background:#ffe9e8;animation:shake .3s}
+  @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .mrow{display:flex;align-items:center;gap:10px;border:2px solid #dbe7ff;border-radius:14px;padding:10px;margin-bottom:10px;background:#f8fbff}
+  .mrow .emoji{font-size:38px}
+  .mcol{flex:1;min-width:0}
+  .mrow .txt b{font-size:15px;display:block}
+  .mrow .txt small{font-size:11px;color:#5a6b8c}
+  .mrow button{border:none;border-radius:10px;padding:9px 10px;font-size:15px;cursor:pointer;background:#e7f0ff}
+  .mrow button.ok{background:#34c77b;color:#fff}
+  .mrow audio{width:100%;margin-top:6px;display:none}
+  .srow{border:2px solid #dbe7ff;border-radius:14px;padding:12px;margin-bottom:12px;background:#f8fbff}
+  .srow.done{border-color:#34c77b;background:#eefbf3}
+  .srow.wrong{border-color:#f0564f;animation:shake .3s}
+  .srow .semoji{font-size:30px}
+  .sans{min-height:34px;font-size:16px;font-weight:700;margin:8px 0;color:#1a2b4a}
+  .achip{background:#4f8ef7;color:#fff;border-radius:8px;padding:4px 8px;margin:2px;display:inline-block;cursor:pointer;font-size:14px;font-weight:600}
+  .swords{margin:6px 0}
+  .wbtn{background:#fff;border:2px solid #bcd2ff;border-radius:10px;padding:8px 12px;margin:3px;font-size:15px;font-weight:600;cursor:pointer;color:#1a2b4a}
+  .wbtn:active{transform:scale(.94)}
+  button.mini{border:none;border-radius:10px;padding:9px 14px;font-size:14px;font-weight:700;cursor:pointer;background:#e7f0ff;color:#1a2b4a;margin-right:6px}
+  #hasil{text-align:center;display:none}
+  #hasil .big{font-size:54px}
+  #hasil h2{margin:8px 0 4px}
+  #hasil p{font-size:14px;color:#5a6b8c;margin-bottom:12px}
+  .btnPrimary{background:#4f8ef7;color:#fff;border:none;padding:12px 24px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin:4px}
+  #btnBack{background:#fff;border:2px solid #4f8ef7;color:#4f8ef7;padding:9px 18px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:12px}
+  #pTitle{font-size:18px;margin-bottom:12px}
+  #matchWrap{position:relative}
+  .mcols{display:flex;gap:10px}
+  .mcol{flex:1;display:flex;flex-direction:column;gap:10px}
+  .mchip{background:#fff;border:2px solid #bcd2ff;border-radius:12px;padding:14px 8px;font-size:16px;font-weight:700;cursor:pointer;color:#1a2b4a}
+  .mchip.sel{border-color:#4f8ef7;background:#e7f0ff}
+  .mchip.done{border-color:#34c77b;background:#eefbf3;color:#34c77b}
+  .mpic{font-size:44px;background:#f8fbff;border:2px solid #dbe7ff;border-radius:14px;padding:10px 6px;cursor:pointer}
+  .mpic.done{border-color:#34c77b;background:#eefbf3}
+  .mpic.wrong{border-color:#f0564f;animation:shake .3s}
+  #matchSvg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+  .cekbox{font-size:14px;margin-top:8px;line-height:2}
+  .wdok{background:#d8f7e6;color:#0d7a3f;border-radius:6px;padding:2px 6px;margin:2px;display:inline-block;font-weight:700}
+  .wdmiss{background:#ffe9c9;color:#b26a00;border-radius:6px;padding:2px 6px;margin:2px;display:inline-block;font-weight:700}
+  .wdx{background:#e8ecf5;color:#8a97b3;border-radius:6px;padding:2px 6px;margin:2px;display:inline-block}
+  .skor{font-size:13px;font-weight:700;margin-top:6px;color:#1a2b4a}
+  .note{font-size:12px;color:#8a97b3;text-align:center;margin-top:6px;line-height:1.6}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📚 englishku</h1>
+  <p>Dari nol sampai bisa percakapan • A1 → B1 • metode riset bahasa</p>
+  <div id="streak">🔥 Streak: 0 hari</div>
+</header>
+
+<div class="modes">
+  <button id="mAnak" class="on" onclick="setMode('anak')">🧒 Anak</button>
+  <button id="mDewasa" onclick="setMode('dewasa')">🧑 Dewasa</button>
+</div>
+
+<main id="home"></main>
+
+<main id="paket" style="display:none">
+  <button id="btnBack" onclick="goHome()">← Beranda</button>
+  <h2 id="pTitle"></h2>
+  <section id="secM">
+    <h2>① Sambung Garis</h2>
+    <p class="hint">Ketuk kata, lalu ketuk gambar yang cocok. Garis hijau = benar. (pemanasan)</p>
+    <div class="counter" id="cntM"></div>
+    <div id="matchWrap"></div>
+  </section>
+  <section id="secA">
+    <h2>② Lihat &amp; Dengar</h2>
+    <p class="hint">Ketuk setiap gambar untuk mendengar cara bacanya. (hafal kata baru)</p>
+    <div class="counter" id="cntA"></div>
+    <div class="grid" id="gridA"></div>
+  </section>
+  <section id="secB">
+    <h2>③ Dengar &amp; Pilih</h2>
+    <p class="hint">Dengarkan, lalu ketuk gambar yang benar. (latihan terkontrol)</p>
+    <div id="quizBox"></div>
+  </section>
+  <section id="secC">
+    <h2>④ Tirukan</h2>
+    <p class="hint">Dengar contoh, rekam suaramu, atau ketuk 🗣️ untuk cek ucapan (Chrome). (latihan bicara)</p>
+    <div id="listC"></div>
+  </section>
+  <section id="secD" style="display:none">
+    <h2>⑤ Susun Kalimat</h2>
+    <p class="hint">Ketuk kata berurutan menjadi kalimat yang benar. (penerapan)</p>
+    <div class="counter" id="cntD"></div>
+    <div id="listD"></div>
+  </section>
+  <section id="hasil">
+    <div class="big">🏆</div>
+    <h2 id="hTitle">Paket selesai!</h2>
+    <p id="pesan"></p>
+    <button class="btnPrimary" onclick="goHome()">← Kembali ke beranda</button>
+  </section>
+</main>
+
+<p class="note">v2 — Kurikulum A1→B1 berdasar standar CEFR.<br>
+Metode: sesi 5 langkah — ① sambung garis → ② hafal kata → ③ latihan → ④ bicara + cek ucapan AI → ⑤ penerapan.<br>
+Plus: input bertahap (i+1) • pengulangan berjeda (paket Ulasan) • tugas situasi nyata.<br>
+Gambar = emoji (nanti diganti ilustrasi), audio = suara bawaan HP, progres tersimpan di HP ini.</p>
+
+<script>
+const $=id=>document.getElementById(id);
+function load(){try{return JSON.parse(localStorage.getItem('engHarianV2'))||{}}catch(e){return{}}}
+let S=load();
+S.stars=S.stars||{};S.done=S.done||{};S.mode=S.mode||'anak';S.streak=S.streak||0;S.lastDay=S.lastDay||'';S.weak=S.weak||{};
+function save(){try{localStorage.setItem('engHarianV2',JSON.stringify(S))}catch(e){}}
+
+function speak(t){
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(t);
+    u.lang='en-US';u.rate=0.85;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function label(it){return S.mode==='anak'?it.w:it.s;}
+function bumpWeak(k){if(!k)return;S.weak[k]=(S.weak[k]||0)+1;save();}
+
+/* Kurikulum: A1 (kata benda inti) -> A2 (frasa sehari-hari) -> B1 (situasi percakapan) */
+/* Kurikulum i+1: tiap kalimat hanya memakai kata yang sudah diajarkan
+   di paket ini / sebelumnya + kata bantu dasar (is, have, like, eat, ...) */
+const STAGES=[
+{cefr:'A1',name:'Dasar',icon:'🌱',desc:'±90 kata benda paling sering dipakai. Target: kenal & ucapkan.',susun:false,levels:[
+ {name:'Buah & Makanan',icon:'🍎',packages:[
+  {name:'Paket 1 • Buah',items:[
+   {e:'🍎',w:'apple',s:'I eat an apple every day.'},
+   {e:'🍌',w:'banana',s:'I like banana and apple.'},
+   {e:'🍊',w:'orange',s:'You have an orange.'},
+   {e:'🍇',w:'grapes',s:'I like grapes.'},
+   {e:'🍉',w:'watermelon',s:'I eat watermelon.'}]},
+  {name:'Paket 2 • Buah tropis',items:[
+   {e:'🥭',w:'mango',s:'I eat a mango.'},
+   {e:'🍍',w:'pineapple',s:'I like pineapple.'},
+   {e:'🍓',w:'strawberry',s:'I eat a strawberry.'},
+   {e:'🥥',w:'coconut',s:'I like coconut.'},
+   {e:'🍋',w:'lemon',s:'I see a lemon.'}]},
+  {name:'Paket 3 • Makanan',items:[
+   {e:'🍚',w:'rice',s:'I eat rice every day.'},
+   {e:'🍳',w:'egg',s:'I eat an egg.'},
+   {e:'🥛',w:'milk',s:'I drink milk.'},
+   {e:'🍞',w:'bread',s:'I eat bread.'},
+   {e:'🐟',w:'fish',s:'I like fish.'}]}
+ ]},
+ {name:'Hewan',icon:'🐱',packages:[
+  {name:'Paket 1 • Hewan peliharaan',items:[
+   {e:'🐱',w:'cat',s:'I have a cat.'},
+   {e:'🐶',w:'dog',s:'I like my dog.'},
+   {e:'🐦',w:'bird',s:'I see a bird.'},
+   {e:'🐰',w:'rabbit',s:'You see a rabbit.'},
+   {e:'🐟',w:'fish',s:'You have a fish.'}]},
+  {name:'Paket 2 • Hewan liar',items:[
+   {e:'🦁',w:'lion',s:'I see a lion.'},
+   {e:'🐯',w:'tiger',s:'You see a tiger.'},
+   {e:'🐘',w:'elephant',s:'We see an elephant.'},
+   {e:'🐵',w:'monkey',s:'I see a monkey.'},
+   {e:'🐍',w:'snake',s:'You see a snake.'}]},
+  {name:'Paket 3 • Hewan ternak',items:[
+   {e:'🐄',w:'cow',s:'A cow has milk.'},
+   {e:'🐔',w:'chicken',s:'A chicken has an egg.'},
+   {e:'🦆',w:'duck',s:'I see a duck.'},
+   {e:'🐴',w:'horse',s:'You see a horse.'},
+   {e:'🐐',w:'goat',s:'We see a goat.'}]}
+ ]},
+ {name:'Sekolah & Alam',icon:'🏠',packages:[
+  {name:'Paket 1 • Sekolah',items:[
+   {e:'📖',w:'book',s:'I have a book.'},
+   {e:'✏️',w:'pencil',s:'I have a pencil.'},
+   {e:'🎒',w:'bag',s:'I like my bag.'},
+   {e:'🏫',w:'school',s:'I see my school.'},
+   {e:'🏠',w:'house',s:'I like my house.'}]},
+  {name:'Paket 2 • Mainan & kendaraan',items:[
+   {e:'⚽',w:'ball',s:'I like my ball.'},
+   {e:'🚗',w:'car',s:'I see a car.'},
+   {e:'🚲',w:'bike',s:'I have a bike.'},
+   {e:'🪁',w:'kite',s:'You see a kite.'},
+   {e:'🪑',w:'chair',s:'I see a chair.'}]},
+  {name:'Paket 3 • Alam',items:[
+   {e:'☀️',w:'sun',s:'I like the sun.'},
+   {e:'🌙',w:'moon',s:'I see the moon.'},
+   {e:'⭐',w:'star',s:'You see a star.'},
+   {e:'🌧️',w:'rain',s:'I see the rain.'},
+   {e:'🌳',w:'tree',s:'We see a tree.'}]}
+ ]},
+ {name:'Tubuh & Pakaian',icon:'👕',packages:[
+  {name:'Paket 1 • Tubuh',items:[
+   {e:'👁️',w:'eye',s:'I see with my eyes.'},
+   {e:'👃',w:'nose',s:'I have a nose.'},
+   {e:'👄',w:'mouth',s:'I have a mouth.'},
+   {e:'✋',w:'hand',s:'This is my hand.'},
+   {e:'🦶',w:'foot',s:'This is my foot.'}]},
+  {name:'Paket 2 • Tubuh',items:[
+   {e:'🦷',w:'tooth',s:'This is my tooth.'},
+   {e:'👂',w:'ear',s:'This is my ear.'},
+   {e:'💪',w:'arm',s:'This is my arm.'},
+   {e:'🦵',w:'leg',s:'This is my leg.'},
+   {e:'👉',w:'finger',s:'This is my finger.'}]},
+  {name:'Paket 3 • Pakaian',items:[
+   {e:'👕',w:'shirt',s:'This is my shirt.'},
+   {e:'👖',w:'pants',s:'These are my pants.'},
+   {e:'👟',w:'shoes',s:'These are my shoes.'},
+   {e:'🧢',w:'hat',s:'I have a hat.'},
+   {e:'👗',w:'dress',s:'She has a dress.'}]}
+ ]},
+ {name:'Keluarga & Rumah',icon:'👨‍👩‍👧',packages:[
+  {name:'Paket 1 • Keluarga',items:[
+   {e:'👨',w:'father',s:'I love my father.'},
+   {e:'👩',w:'mother',s:'I love my mother.'},
+   {e:'👦',w:'brother',s:'This is my brother.'},
+   {e:'👧',w:'sister',s:'This is my sister.'},
+   {e:'👶',w:'baby',s:'I see a baby.'}]},
+  {name:'Paket 2 • Keluarga besar',items:[
+   {e:'👴',w:'grandfather',s:'This is my grandfather.'},
+   {e:'👵',w:'grandmother',s:'This is my grandmother.'},
+   {e:'🧔',w:'uncle',s:'This is my uncle.'},
+   {e:'👩‍🦰',w:'aunt',s:'This is my aunt.'},
+   {e:'👨‍👩‍👧',w:'family',s:'I love my family.'}]},
+  {name:'Paket 3 • Rumah',items:[
+   {e:'🛏️',w:'bed',s:'This is my bed.'},
+   {e:'🚪',w:'door',s:'I see the door.'},
+   {e:'🪟',w:'window',s:'I see the window.'},
+   {e:'💡',w:'lamp',s:'I have a lamp.'},
+   {e:'🍳',w:'kitchen',s:'Mother is in the kitchen.'}]}
+ ]},
+ {name:'Angka, Warna & Kerja',icon:'🔢',packages:[
+  {name:'Paket 1 • Angka',items:[
+   {e:'1️⃣',w:'one',s:'I have one apple.'},
+   {e:'2️⃣',w:'two',s:'I see two cats.'},
+   {e:'3️⃣',w:'three',s:'I have three books.'},
+   {e:'4️⃣',w:'four',s:'I see four birds.'},
+   {e:'5️⃣',w:'five',s:'I have five pencils.'}]},
+  {name:'Paket 2 • Warna',items:[
+   {e:'🔴',w:'red',s:'An apple is red.'},
+   {e:'🔵',w:'blue',s:'My shirt is blue.'},
+   {e:'🟢',w:'green',s:'A tree is green.'},
+   {e:'🟡',w:'yellow',s:'A banana is yellow.'},
+   {e:'⚫',w:'black',s:'My shoes are black.'}]},
+  {name:'Paket 3 • Kata kerja',items:[
+   {e:'🍽️',w:'eat',s:'I eat rice.'},
+   {e:'🥤',w:'drink',s:'I drink milk.'},
+   {e:'🏃',w:'run',s:'I run with my dog.'},
+   {e:'😴',w:'sleep',s:'I sleep every day.'},
+   {e:'📖',w:'read',s:'I read a book.'}]}
+ ]}
+]},
+{cefr:'A2',name:'Sehari-hari',icon:'🗣️',desc:'±60 frasa & kalimat harian. Target: ngobrol simpel.',susun:true,levels:[
+ {name:'Sapaan & Rutinitas',icon:'👋',packages:[
+  {name:'Paket 1 • Sapaan',items:[
+   {e:'👋',w:'hello',s:'Hello! How are you?'},
+   {e:'🌅',w:'good morning',s:'Good morning, Mother.'},
+   {e:'🙏',w:'thank you',s:'Thank you very much.'},
+   {e:'😔',w:'sorry',s:'Sorry, Mother.'},
+   {e:'👋',w:'goodbye',s:'Goodbye, Father.'}]},
+  {name:'Paket 2 • Perkenalan',items:[
+   {e:'📛',w:'my name is',s:'My name is Budi.'},
+   {e:'🗺️',w:'I am from',s:'I am from Indonesia.'},
+   {e:'🎂',w:'years old',s:'I am five years old.'},
+   {e:'🏠',w:'I live in',s:'I live in Jakarta.'},
+   {e:'❤️',w:'I like',s:'I like apples.'}]},
+  {name:'Paket 3 • Rutinitas',items:[
+   {e:'⏰',w:'wake up',s:'I wake up at five.'},
+   {e:'🍳',w:'have breakfast',s:'I have breakfast every day.'},
+   {e:'🎒',w:'go to school',s:'I go to school every day.'},
+   {e:'✏️',w:'do homework',s:'I do my homework.'},
+   {e:'🛌',w:'go to bed',s:'I go to bed every day.'}]}
+ ]},
+ {name:'Waktu, Cuaca & Rasa',icon:'🌤️',packages:[
+  {name:'Paket 1 • Waktu',items:[
+   {e:'📅',w:'today',s:'What day is today?'},
+   {e:'🔜',w:'tomorrow',s:'I see you tomorrow.'},
+   {e:'☀️',w:'in the morning',s:'I run in the morning.'},
+   {e:'🌃',w:'at night',s:'I sleep at night.'},
+   {e:'🕐',w:"o'clock",s:"It is five o'clock."}]},
+  {name:'Paket 2 • Cuaca',items:[
+   {e:'☀️',w:'sunny',s:'It is sunny today.'},
+   {e:'🌧️',w:'rainy',s:'It is rainy today.'},
+   {e:'☁️',w:'cloudy',s:'It is cloudy today.'},
+   {e:'🥵',w:'hot',s:'It is hot today.'},
+   {e:'🥶',w:'cold',s:'It is cold today.'}]},
+  {name:'Paket 3 • Perasaan',items:[
+   {e:'😊',w:'happy',s:'I am happy today.'},
+   {e:'😢',w:'sad',s:'I am sad today.'},
+   {e:'😮‍💨',w:'tired',s:'I am tired today.'},
+   {e:'🍽️',w:'hungry',s:'Are you hungry?'},
+   {e:'🤒',w:'sick',s:'I am sick today.'}]}
+ ]},
+ {name:'Belanja & Tempat',icon:'🛒',packages:[
+  {name:'Paket 1 • Belanja',items:[
+   {e:'💰',w:'how much',s:'How much is an apple?'},
+   {e:'🛒',w:'buy',s:'I buy apples.'},
+   {e:'👍',w:'cheap',s:'The book is cheap.'},
+   {e:'💎',w:'expensive',s:'The car is expensive.'},
+   {e:'🪙',w:'change',s:'This is your change.'}]},
+  {name:'Paket 2 • Rasa makanan',items:[
+   {e:'😋',w:'delicious',s:'The rice is delicious.'},
+   {e:'🌶️',w:'spicy',s:'The fish is spicy.'},
+   {e:'🍬',w:'sweet',s:'The mango is sweet.'},
+   {e:'🥤',w:'thirsty',s:'I am thirsty.'},
+   {e:'🍽️',w:'full',s:'I am full.'}]},
+  {name:'Paket 3 • Arah',items:[
+   {e:'📍',w:'where is',s:'Where is my book?'},
+   {e:'↔️',w:'near',s:'The school is near my house.'},
+   {e:'🛣️',w:'far',s:'My house is far.'},
+   {e:'⬅️',w:'turn left',s:'Turn left here.'},
+   {e:'➡️',w:'turn right',s:'Turn right here.'}]}
+ ]},
+ {name:'Sekolah & Sifat',icon:'🎒',packages:[
+  {name:'Paket 1 • Sekolah',items:[
+   {e:'👩‍🏫',w:'teacher',s:'I like my teacher.'},
+   {e:'📚',w:'lesson',s:'I like the lesson.'},
+   {e:'📝',w:'exam',s:'I have an exam.'},
+   {e:'✅',w:'pass',s:'I pass the exam.'},
+   {e:'📖',w:'study',s:'I study every day.'}]},
+  {name:'Paket 2 • Hobi',items:[
+   {e:'🎨',w:'hobby',s:'My hobby is books.'},
+   {e:'⚽',w:'play',s:'I play every day.'},
+   {e:'🏊',w:'swim',s:'I swim every day.'},
+   {e:'🎤',w:'sing',s:'I sing every day.'},
+   {e:'✏️',w:'draw',s:'I draw every day.'}]},
+  {name:'Paket 3 • Sifat',items:[
+   {e:'🐘',w:'big',s:'An elephant is big.'},
+   {e:'🐭',w:'small',s:'A cat is small.'},
+   {e:'🏎️',w:'fast',s:'A car is fast.'},
+   {e:'🐢',w:'slow',s:'My bike is slow.'},
+   {e:'✨',w:'new',s:'I have a new book.'}]},
+  {name:'Paket 4 • Sifat',items:[
+   {e:'📏',w:'long',s:'The snake is long.'},
+   {e:'✏️',w:'short',s:'The pencil is short.'},
+   {e:'👕',w:'clean',s:'My shirt is clean.'},
+   {e:'👟',w:'dirty',s:'My shoes are dirty.'},
+   {e:'📖',w:'old',s:'The book is old.'}]}
+ ]}
+]},
+{cefr:'B1',name:'Percakapan',icon:'💬',desc:'±60 situasi nyata. Target: percaya diri ngobrol.',susun:true,levels:[
+ {name:'Pasar, Resto & Janji',icon:'🍜',packages:[
+  {name:'Paket 1 • Di pasar',items:[
+   {e:'🤝',w:'Can you lower the price?',s:'Can you lower the price, please?'},
+   {e:'🥬',w:'Is this fresh?',s:'Is this fish fresh?'},
+   {e:'⚖️',w:'half a kilo',s:'I buy half a kilo.'},
+   {e:'💵',w:'How much is the total?',s:'How much is the total, please?'},
+   {e:'🏷️',w:'Is there a discount?',s:'Is there a discount today?'}]},
+  {name:'Paket 2 • Di restoran',items:[
+   {e:'📋',w:'Can I see the menu?',s:'Can I see the menu, please?'},
+   {e:'🍽️',w:'I would like to order',s:'I would like to order rice.'},
+   {e:'🌶️',w:'Not too spicy',s:'Not too spicy, please.'},
+   {e:'🧾',w:'Can I have the bill?',s:'Can I have the bill, please?'},
+   {e:'😋',w:'It tastes great',s:'The fish tastes great.'}]},
+  {name:'Paket 3 • Telepon & janji',items:[
+   {e:'📞',w:'May I speak to',s:'May I speak to Andi?'},
+   {e:'📅',w:'make an appointment',s:'I make an appointment today.'},
+   {e:'📵',w:'I am busy',s:'I am busy today.'},
+   {e:'↩️',w:'I will call back',s:'I will call back tomorrow.'},
+   {e:'⏳',w:'Please wait a moment',s:'Please wait a moment.'}]}
+ ]},
+ {name:'Kesehatan',icon:'🏥',packages:[
+  {name:'Paket 1 • Di klinik',items:[
+   {e:'🤒',w:'I feel sick',s:'I feel sick today.'},
+   {e:'🌡️',w:'I have a fever',s:'I have a fever today.'},
+   {e:'😖',w:'It hurts here',s:'It hurts here.'},
+   {e:'💊',w:'take medicine',s:'I take medicine every day.'},
+   {e:'🛌',w:'You need rest',s:'You need rest today.'}]},
+  {name:'Paket 2 • Darurat',items:[
+   {e:'⚕️',w:'Where is the pharmacy?',s:'Where is the pharmacy?'},
+   {e:'🆘',w:'I need help',s:'I need help, please!'},
+   {e:'🚨',w:'It is an emergency',s:'It is an emergency!'},
+   {e:'🤧',w:'I am allergic to',s:'I am allergic to fish.'},
+   {e:'🙂',w:'I feel better',s:'I feel better today.'}]},
+  {name:'Paket 3 • Gaya hidup',items:[
+   {e:'🏋️',w:'exercise every day',s:'I exercise every day.'},
+   {e:'🥗',w:'stay healthy',s:'I run to stay healthy.'},
+   {e:'😴',w:'sleep early',s:'I sleep early every day.'},
+   {e:'😮‍💨',w:'I feel tired',s:'I feel tired today.'},
+   {e:'💪',w:'stay strong',s:'I swim to stay strong.'}]}
+ ]},
+ {name:'Perjalanan',icon:'✈️',packages:[
+  {name:'Paket 1 • Transportasi',items:[
+   {e:'🎫',w:'A ticket to',s:'A ticket to Jakarta, please.'},
+   {e:'🚌',w:'What time does it leave?',s:'What time does it leave?'},
+   {e:'🛬',w:'What time do we arrive?',s:'What time do we arrive?'},
+   {e:'🚉',w:'Which platform?',s:'Which platform, please?'},
+   {e:'⏰',w:'Is it delayed?',s:'Is it delayed today?'}]},
+  {name:'Paket 2 • Hotel',items:[
+   {e:'🏨',w:'I have a reservation',s:'I have a reservation today.'},
+   {e:'🔑',w:'check in',s:'I check in today.'},
+   {e:'🛏️',w:'Is breakfast included?',s:'Is breakfast included today?'},
+   {e:'📶',w:'What is the wifi password?',s:'What is the wifi password?'},
+   {e:'🧳',w:'check out',s:'I check out tomorrow.'}]},
+  {name:'Paket 3 • Wisata',items:[
+   {e:'🗺️',w:'Can you show me on the map?',s:'Can you show me the map?'},
+   {e:'😕',w:'I am lost',s:'I am lost. Help me, please!'},
+   {e:'🏝️',w:'It is beautiful here',s:'It is beautiful here!'},
+   {e:'📸',w:'Can you take a photo?',s:'Can you take a photo, please?'},
+   {e:'🎁',w:'I want a souvenir',s:'I want a souvenir for Mother.'}]}
+ ]},
+ {name:'Kerja & Pendapat',icon:'💼',packages:[
+  {name:'Paket 1 • Kerja',items:[
+   {e:'💼',w:'What do you do?',s:'What do you do every day?'},
+   {e:'🏢',w:'I work in an office',s:'I work in an office.'},
+   {e:'🤝',w:'We have a meeting',s:'We have a meeting today.'},
+   {e:'⏰',w:'The deadline is Friday',s:'The deadline is Friday.'},
+   {e:'💰',w:'What is the salary?',s:'What is the salary, please?'}]},
+  {name:'Paket 2 • Pendapat',items:[
+   {e:'💭',w:'I think that',s:'I think that is cheap.'},
+   {e:'👍',w:'I agree with you',s:'I agree with you.'},
+   {e:'👎',w:'I do not agree',s:'I do not agree. Sorry.'},
+   {e:'🔗',w:'because',s:'I run because I like it.'},
+   {e:'↔️',w:'however',s:'It is rainy. However, I run.'}]},
+  {name:'Paket 3 • Rencana',items:[
+   {e:'📝',w:'What is your plan?',s:'What is your plan today?'},
+   {e:'🔮',w:'I will',s:'I will swim tomorrow.'},
+   {e:'🚀',w:'I am going to',s:'I am going to Jakarta.'},
+   {e:'🤔',w:'maybe',s:'Maybe I swim tomorrow.'},
+   {e:'🌟',w:'I hope',s:'I hope you are happy.'}]}
+ ]}
+]}
+];
+
+/* ---------- status ---------- */
+let ITEMS=[],heard=new Set(),mimicDone=new Set();
+let quizOrder=[],quizIdx=0,quizScore=0,quizDone=false;
+let susunWords=[],susunAns=[],susunDone=new Set();
+let curS=0,curL=0,curP=0,saved=false,REVIEW=false,mr=null;
+let matchSel=-1,matchDone=new Set();
+
+function pkgKey(s,l,p){return s+'_'+l+'_'+p;}
+function prevPkg(s,l,p){
+  if(p>0)return pkgKey(s,l,p-1);
+  if(l>0){const L=STAGES[s].levels[l-1];return pkgKey(s,l-1,L.packages.length-1);}
+  if(s>0){const St=STAGES[s-1],L=St.levels[St.levels.length-1];return pkgKey(s-1,St.levels.length-1,L.packages.length-1);}
+  return null;
+}
+function pkgUnlocked(s,l,p){
+  const pr=prevPkg(s,l,p);
+  return !pr||!!S.done[pr];
+}
+function stageSusun(si){return !!STAGES[si].susun;}
+function maxStars(){return REVIEW?(5+(stageSusun(curS)?5:0)):(15+(stageSusun(curS)?5:0));}
+
+/* ---------- beranda ---------- */
+function setMode(m){
+  S.mode=m;save();setModeBtn();
+  if($('paket').style.display!=='none'&&!REVIEW){renderA();renderC();}
+}
+function setModeBtn(){
+  $('mAnak').className=S.mode==='anak'?'on':'';
+  $('mDewasa').className=S.mode==='dewasa'?'on':'';
+}
+function weakCount(si){
+  return Object.keys(S.weak).filter(k=>k.startsWith(si+'_')&&S.weak[k]>0).length;
+}
+function renderHome(){
+  const h=$('home');h.innerHTML='';
+  STAGES.forEach((st,si)=>{
+    const sec=document.createElement('section');
+    let total=0,done=0,cards='';
+    st.levels.forEach((lv,l)=>{
+      cards+='<div style="font-size:14px;font-weight:700;margin:10px 0 6px">'+lv.icon+' '+lv.name+'</div><div class="pkggrid">';
+      lv.packages.forEach((pk,p)=>{
+        total++;
+        const un=pkgUnlocked(si,l,p),key=pkgKey(si,l,p),star=S.stars[key]||0;
+        if(S.done[key])done++;
+        const mx=20+(st.susun?5:0);
+        cards+='<button class="pkg'+(un?'':' lock')+'"'+(un?' onclick="openPkg('+si+','+l+','+p+')"':' disabled')+'>'+
+          '<div class="pkname">'+pk.name+'</div>'+
+          '<div class="pkstar">'+(un?('⭐ '+star+' / '+mx):'🔒')+'</div></button>';
+      });
+      cards+='</div>';
+    });
+    const pct=total?Math.round(done/total*100):0;
+    const wc=weakCount(si);
+    sec.innerHTML='<div class="stageHead"><span class="cefr">'+st.cefr+'</span>'+
+      '<h2 style="margin:0">'+st.icon+' '+st.name+'</h2></div>'+
+      '<div class="stageDesc">'+st.desc+'</div>'+
+      '<div class="pbar"><div style="width:'+pct+'%"></div></div>'+
+      '<div class="stageDesc">'+done+' / '+total+' paket selesai</div>'+cards+
+      '<button class="reviewBtn" '+(wc?'onclick="openReview('+si+')"':'disabled')+'>🔁 Paket Ulasan'+(wc?' ('+wc+' kata lemah)':' (belum ada)')+'</button>'+
+      '<div class="stageDesc" style="margin-top:6px">Ulasan = pengulangan berjeda: kata yang pernah salah muncul lagi di sini.</div>';
+    h.appendChild(sec);
+  });
+  $('streak').textContent='🔥 Streak: '+S.streak+' hari';
+  setModeBtn();
+}
+function goHome(){
+  $('paket').style.display='none';$('home').style.display='block';
+  renderHome();window.scrollTo(0,0);
+}
+
+/* ---------- buka paket ---------- */
+function openPkg(s,l,p){
+  curS=s;curL=l;curP=p;saved=false;REVIEW=false;
+  ITEMS=STAGES[s].levels[l].packages[p].items.map((it,i)=>Object.assign({_k:s+'_'+l+'_'+p+'_'+i},it));
+  heard=new Set();mimicDone=new Set();quizDone=false;matchDone=new Set();matchSel=-1;
+  $('pTitle').textContent='📅 '+STAGES[s].levels[l].packages[p].name+' — '+STAGES[s].cefr;
+  $('home').style.display='none';$('paket').style.display='block';$('hasil').style.display='none';
+  $('secM').style.display='';$('secA').style.display='';$('secC').style.display='';
+  const sd=$('secD');sd.style.display=stageSusun(s)?'':'none';
+  $('hTitle').textContent='Paket selesai!';
+  renderMatch();renderA();renderC();if(stageSusun(s))renderD();startQuiz();
+  window.scrollTo(0,0);
+}
+function pickReview(si){
+  const out=[];
+  Object.entries(S.weak).filter(([k,v])=>k.startsWith(si+'_')&&v>0)
+    .sort((a,b)=>b[1]-a[1]).slice(0,5).forEach(([k])=>{
+      const parts=k.split('_').map(Number);
+      const it=STAGES[parts[0]].levels[parts[1]].packages[parts[2]].items[parts[3]];
+      if(it)out.push(Object.assign({_k:k},it));
+    });
+  if(out.length<5){
+    const pool=[];
+    STAGES[si].levels.forEach((lv,l)=>lv.packages.forEach((pk,p)=>pk.items.forEach((it,i)=>{
+      const k=si+'_'+l+'_'+p+'_'+i;
+      if(!out.find(x=>x._k===k))pool.push(Object.assign({_k:k},it));
+    })));
+    shuffle(pool);
+    while(out.length<5&&pool.length)out.push(pool.pop());
+  }
+  return out;
+}
+function openReview(si){
+  curS=si;saved=false;REVIEW=true;
+  ITEMS=pickReview(si);
+  if(!ITEMS.length)return;
+  heard=new Set();mimicDone=new Set();quizDone=false;matchDone=new Set();matchSel=-1;
+  $('pTitle').textContent='🔁 Paket Ulasan — '+STAGES[si].cefr+' '+STAGES[si].name;
+  $('home').style.display='none';$('paket').style.display='block';$('hasil').style.display='none';
+  $('secA').style.display='none';$('secC').style.display='none';$('secM').style.display='none';
+  const sd=$('secD');sd.style.display=stageSusun(si)?'':'none';
+  $('hTitle').textContent='Ulasan selesai!';
+  if(stageSusun(si))renderD();startQuiz();
+  window.scrollTo(0,0);
+}
+
+/* ---------- 1: sambung garis ---------- */
+function renderMatch(){
+  const w=$('matchWrap');
+  const idx=ITEMS.map((_,i)=>i);
+  const wOrd=shuffle([...idx]),pOrd=shuffle([...idx]);
+  w.innerHTML='<svg id="matchSvg"></svg><div class="mcols"><div class="mcol" id="mcolW"></div><div class="mcol" id="mcolP"></div></div>';
+  const cw=$('mcolW'),cp=$('mcolP');
+  wOrd.forEach(i=>{
+    const b=document.createElement('button');
+    b.className='mchip';b.id='mw'+i;b.textContent=ITEMS[i].w;
+    b.onclick=()=>{
+      if(matchDone.has(i))return;
+      document.querySelectorAll('.mchip').forEach(x=>x.classList.remove('sel'));
+      matchSel=i;b.classList.add('sel');speak(ITEMS[i].w);
+    };
+    cw.appendChild(b);
+  });
+  pOrd.forEach(i=>{
+    const b=document.createElement('button');
+    b.className='mpic';b.id='mp'+i;b.textContent=ITEMS[i].e;
+    b.onclick=()=>pickPic(i);
+    cp.appendChild(b);
+  });
+  $('cntM').textContent='Cocok: 0 / '+ITEMS.length;
+}
+function pickPic(i){
+  if(matchSel<0||matchDone.has(i))return;
+  if(i===matchSel){
+    matchDone.add(i);
+    $('mw'+i).classList.add('done');$('mp'+i).classList.add('done');
+    $('mw'+i).classList.remove('sel');
+    drawLine(i);speak(ITEMS[i].w);matchSel=-1;
+    $('cntM').textContent='Cocok: '+matchDone.size+' / '+ITEMS.length;
+    checkFinish();
+  }else{
+    bumpWeak(ITEMS[matchSel]._k);
+    const p=$('mp'+i);p.classList.add('wrong');
+    setTimeout(()=>p.classList.remove('wrong'),400);
+  }
+}
+function drawLine(i){
+  const wrap=$('matchWrap'),svg=$('matchSvg');
+  const wr=wrap.getBoundingClientRect();
+  const a=$('mw'+i).getBoundingClientRect(),b=$('mp'+i).getBoundingClientRect();
+  const ln=document.createElementNS('http://www.w3.org/2000/svg','line');
+  ln.setAttribute('x1',a.right-wr.left);ln.setAttribute('y1',a.top+a.height/2-wr.top);
+  ln.setAttribute('x2',b.left-wr.left);ln.setAttribute('y2',b.top+b.height/2-wr.top);
+  ln.setAttribute('stroke','#34c77b');ln.setAttribute('stroke-width','4');
+  ln.setAttribute('stroke-linecap','round');
+  svg.appendChild(ln);
+}
+
+/* ---------- A: lihat & dengar ---------- */
+function renderA(){
+  const g=$('gridA');g.innerHTML='';
+  ITEMS.forEach((it,i)=>{
+    const d=document.createElement('div');
+    d.className='card'+(heard.has(i)?' done':'');
+    d.innerHTML='<div class="emoji">'+it.e+'</div><div class="word">'+it.w+
+      (S.mode==='dewasa'?'<div class="sent">'+it.s+'</div>':'')+'</div>'+
+      (heard.has(i)?'<div style="font-size:12px;color:#34c77b;font-weight:700">✓</div>':'');
+    d.onclick=()=>{speak(label(it));heard.add(i);renderA();checkFinish();};
+    g.appendChild(d);
+  });
+  $('cntA').textContent='Didengar: '+heard.size+' / '+ITEMS.length;
+}
+
+/* ---------- B: dengar & pilih ---------- */
+function startQuiz(){
+  quizOrder=shuffle(ITEMS.map((_,i)=>i));
+  quizIdx=0;quizScore=0;quizDone=false;
+  renderQuiz();
+}
+function renderQuiz(){
+  const box=$('quizBox');
+  if(quizIdx>=quizOrder.length){
+    quizDone=true;
+    box.innerHTML='<p style="font-size:16px;font-weight:700;color:#34c77b">✅ Bagian B selesai! Skor: '+quizScore+' / '+ITEMS.length+'</p>';
+    checkFinish();return;
+  }
+  const ci=quizOrder[quizIdx],it=ITEMS[ci];
+  const others=shuffle(ITEMS.map((_,i)=>i).filter(i=>i!==ci)).slice(0,3);
+  const opts=shuffle([ci].concat(others));
+  let html='<p class="counter">Soal '+(quizIdx+1)+' / '+ITEMS.length+'</p>';
+  html+='<button id="btnListen" onclick="speak(ITEMS['+ci+'].w)">🔊 Dengarkan</button><div class="opts">';
+  opts.forEach(oi=>{html+='<div class="opt" onclick="jawab('+oi+','+ci+',this)">'+ITEMS[oi].e+'</div>';});
+  html+='</div>';
+  box.innerHTML=html;
+  setTimeout(()=>speak(it.w),300);
+}
+function jawab(oi,ci,el){
+  const it=ITEMS[ci];
+  if(oi===ci){
+    el.classList.add('right');quizScore++;
+    document.querySelectorAll('.opt').forEach(o=>o.onclick=null);
+    setTimeout(()=>{quizIdx++;renderQuiz();},800);
+  }else{
+    el.classList.add('wrong');bumpWeak(it._k);
+    setTimeout(()=>el.classList.remove('wrong'),400);
+  }
+  checkFinish();
+}
+
+/* ---------- C: tirukan ---------- */
+function renderC(){
+  const w=$('listC');w.innerHTML='';
+  ITEMS.forEach((it,i)=>{
+    const d=document.createElement('div');d.className='mrow';
+    d.innerHTML='<div class="emoji">'+it.e+'</div>'+
+      '<div class="mcol"><div class="txt"><b>'+it.w+'</b>'+
+      (S.mode==='dewasa'?'<small>'+it.s+'</small>':'')+'</div>'+
+      '<audio id="aud'+i+'" controls></audio>'+
+      '<div class="cekbox" id="cek'+i+'"></div></div>'+
+      '<div><button onclick="speak(label(ITEMS['+i+']))" title="Contoh">🔊</button> '+
+      '<button id="rec'+i+'" onclick="toggleRec('+i+')" title="Rekam">🎙️</button> '+
+      '<button onclick="cekUcap('+i+')" title="Cek ucapan AI">🗣️</button> '+
+      '<button id="ok'+i+'" class="'+(mimicDone.has(i)?'ok':'')+'" onclick="toggleOk('+i+')" title="Sudah meniru">✓</button></div>';
+    w.appendChild(d);
+  });
+}
+async function toggleRec(i){
+  if(mr&&mr.state==='recording'){mr.stop();return;}
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    const chunks=[];mr=new MediaRecorder(stream);
+    mr.ondataavailable=e=>chunks.push(e.data);
+    mr.onstop=()=>{
+      const a=$('aud'+i);
+      a.src=URL.createObjectURL(new Blob(chunks,{type:'audio/webm'}));
+      a.style.display='block';
+      stream.getTracks().forEach(t=>t.stop());
+      $('rec'+i).textContent='🎙️';
+    };
+    mr.start();$('rec'+i).textContent='⏹️';
+  }catch(e){alert('Mic tidak bisa diakses di perangkat ini.');}
+}
+function toggleOk(i){
+  if(mimicDone.has(i))mimicDone.delete(i);else mimicDone.add(i);
+  $('ok'+i).className=mimicDone.has(i)?'ok':'';
+  checkFinish();
+}
+
+/* ---------- cek ucapan (Web Speech API, en-US) ---------- */
+let ucapRec=null;
+function cekUcap(i){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const box=$('cek'+i);
+  if(!SR){box.innerHTML='<span style="color:#f0564f">Browser tidak mendukung. Pakai Chrome.</span>';return;}
+  const it=ITEMS[i];
+  const target=(S.mode==='anak'?it.w:it.s);
+  box.innerHTML='<span style="color:#4f8ef7">🎙️ Bicara sekarang…</span>';
+  let stopped=false;
+  ucapRec=new SR();ucapRec.lang='en-US';ucapRec.interimResults=false;ucapRec.maxAlternatives=1;
+  ucapRec.onresult=(e)=>{
+    const said=e.results[0][0].transcript;
+    const r=diffWords(target,said);
+    box.innerHTML=r.html;
+    if(r.score>=80&&!mimicDone.has(i)){toggleOk(i);}
+    else if(r.score<60){bumpWeak(it._k);}
+  };
+  ucapRec.onerror=(e)=>{
+    if(e.error==='aborted'&&stopped)return;
+    if(e.error==='no-speech'){box.innerHTML='<span style="color:#8a97b3">Tidak terdengar. Coba lagi.</span>';return;}
+    box.innerHTML='<span style="color:#f0564f">Gagal: '+e.error+'. Coba lagi.</span>';
+  };
+  try{ucapRec.start();}catch(e){}
+  setTimeout(()=>{stopped=true;try{ucapRec.stop();}catch(e){}},7000);
+}
+function diffWords(target,said){
+  const tw=target.toLowerCase().replace(/[.,!?]/g,'').split(/\s+/).filter(Boolean);
+  const sw=said.toLowerCase().replace(/[.,!?]/g,'').split(/\s+/).filter(Boolean);
+  let html='',si=0,correct=0;
+  tw.forEach(w=>{
+    const idx=sw.indexOf(w,si);
+    if(idx>=0){
+      for(let k=si;k<idx;k++)html+='<span class="wdx">'+escHtml(sw[k])+'</span> ';
+      html+='<span class="wdok">'+escHtml(w)+'</span> ';correct++;si=idx+1;
+    }else{
+      html+='<span class="wdmiss">'+escHtml(w)+'</span> ';
+    }
+  });
+  for(let k=si;k<sw.length;k++)html+='<span class="wdx">'+escHtml(sw[k])+'</span> ';
+  const score=tw.length?Math.round(correct/tw.length*100):0;
+  html+='<div class="skor">Skor '+score+'% — terdengar: “'+escHtml(said)+'”</div>';
+  return {html:html,score:score};
+}
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+/* ---------- D: susun kalimat ---------- */
+function renderD(){
+  const w=$('listD');w.innerHTML='';
+  susunWords=[];susunAns=[];susunDone=new Set();
+  ITEMS.forEach((it,i)=>{
+    const words=it.s.split(' ');
+    susunWords[i]=shuffle(words.map((_,wi)=>wi));
+    susunAns[i]=[];
+    const d=document.createElement('div');d.className='srow';d.id='srow'+i;
+    d.innerHTML='<div class="semoji">'+it.e+'</div>'+
+      '<div class="sans" id="sans'+i+'"></div>'+
+      '<div class="swords" id="swords'+i+'"></div>'+
+      '<div><button class="mini" onclick="cekSusun('+i+')">✓ Cek</button>'+
+      '<button class="mini" onclick="resetSusun('+i+')">↺ Ulang</button></div>';
+    w.appendChild(d);
+    drawSusun(i);
+  });
+  $('cntD').textContent='Benar: 0 / '+ITEMS.length;
+}
+function drawSusun(i){
+  const words=ITEMS[i].s.split(' ');
+  const wb=$('swords'+i);wb.innerHTML='';
+  susunWords[i].forEach(wi=>{
+    if(susunAns[i].indexOf(wi)>=0)return;
+    const b=document.createElement('button');b.className='wbtn';b.textContent=words[wi];
+    b.onclick=()=>{susunAns[i].push(wi);drawSusun(i);};
+    wb.appendChild(b);
+  });
+  $('sans'+i).innerHTML=susunAns[i].length?
+    susunAns[i].map(wi=>'<span class="achip" onclick="unpick('+i+','+wi+')">'+words[wi]+'</span>').join(' '):
+    '<span style="color:#8a97b3">ketuk kata di bawah…</span>';
+}
+function unpick(i,wi){susunAns[i]=susunAns[i].filter(x=>x!==wi);drawSusun(i);}
+function resetSusun(i){susunAns[i]=[];$('srow'+i).classList.remove('wrong');drawSusun(i);}
+function cekSusun(i){
+  const it=ITEMS[i],words=it.s.split(' ');
+  const ans=susunAns[i].map(wi=>words[wi]).join(' ');
+  if(ans===it.s&&susunAns[i].length===words.length){
+    if(!susunDone.has(i)){susunDone.add(i);speak(it.s);}
+    $('srow'+i).classList.add('done');
+    $('cntD').textContent='Benar: '+susunDone.size+' / '+ITEMS.length;
+  }else{
+    bumpWeak(it._k);
+    const r=$('srow'+i);r.classList.add('wrong');
+    setTimeout(()=>r.classList.remove('wrong'),500);
+  }
+  checkFinish();
+}
+
+/* ---------- selesai ---------- */
+function totalStars(){return heard.size+quizScore+mimicDone.size+susunDone.size;}
+function checkFinish(){
+  if(saved||!ITEMS.length)return;
+  const needD=stageSusun(curS);
+  if(REVIEW){
+    if(quizDone&&(!needD||susunDone.size===ITEMS.length)){
+      saved=true;
+      Object.keys(S.weak).forEach(k=>{
+        if(k.startsWith(curS+'_'))S.weak[k]=Math.floor(S.weak[k]/2);
+      });
+      save();
+      $('hasil').style.display='block';
+      $('pesan').textContent='Kata-kata lemah sudah diulang. Ulasan berikutnya muncul saat ada yang salah lagi. 💪';
+      $('hasil').scrollIntoView({behavior:'smooth'});
+    }
+    return;
+  }
+  if(matchDone.size===ITEMS.length&&heard.size===ITEMS.length&&quizDone&&mimicDone.size===ITEMS.length&&(!needD||susunDone.size===ITEMS.length)){
+    saved=true;
+    const key=pkgKey(curS,curL,curP),stars=totalStars();
+    if(stars>(S.stars[key]||0))S.stars[key]=stars;
+    S.done[key]=true;
+    const today=new Date().toISOString().slice(0,10);
+    if(S.lastDay!==today){
+      const yest=new Date(Date.now()-864e5).toISOString().slice(0,10);
+      S.streak=(S.lastDay===yest)?S.streak+1:1;
+      S.lastDay=today;
+    }
+    save();
+    $('hasil').style.display='block';
+    const mx=maxStars();
+    $('pesan').textContent='Skor: ⭐ '+stars+' / '+mx+'. '+
+      (stars>=mx-1?'Luar biasa! Paket berikutnya sudah terbuka. 🎉':
+       stars>=Math.round(mx*0.7)?'Bagus! Ulangi yang masih sulit besok. 💪':
+       'Pelan-pelan, ulangi paket ini sekali lagi ya. 🌱');
+    $('hasil').scrollIntoView({behavior:'smooth'});
+  }
+}
+
+renderHome();
+</script>
+<script>
+/* auto-update englishku */
+const APP_V=1;
+(function(){
+  fetch('version.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw 0;return r.json();}).then(j=>{
+    if(j&&j.version>APP_V&&confirm('Ada versi baru englishku (v'+j.version+'). Update sekarang?')){
+      if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(x=>x.unregister()));}
+      location.reload();
+    }
+  }).catch(()=>{});
+  if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0){
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  }
+})();
+</script>
+</body>
+</html>
